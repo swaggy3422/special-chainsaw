@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FUND.GO/EDD</title>
+<style>
+:root{--accent:#7c5cff;--bg:#10111a;--panel:#1b1d2b;--text:#f5f5fb;--muted:#aeb1c5}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px system-ui,sans-serif}
+header{padding:28px 5vw;background:linear-gradient(120deg,#24213c,#171927)}h1{margin:0;font-size:clamp(28px,5vw,48px)}
+header p{color:var(--muted)}main{max-width:1100px;margin:auto;padding:24px 5vw}
+nav,.controls{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
+button,input,select{background:var(--panel);color:var(--text);border:1px solid #41445b;border-radius:10px;padding:11px}
+button{cursor:pointer}button.active{border-color:var(--accent);background:#302a50}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+.item{background:var(--panel);border:1px solid #303348;border-radius:14px;padding:15px;min-height:120px}
+.item h3{margin:0 0 8px}.item p{color:var(--muted);font-size:13px}.item a{color:#c8bfff}
+small{color:var(--muted)}section{margin:26px 0}.hidden{display:none}
+</style></head><body>
+<header><h1>FUND.GO/EDD</h1><p>A searchable directory of browser-game links and useful apps.</p></header>
+<main>
+<nav><button class="active" data-tab="games">Games directory</button><button data-tab="apps">Apps directory</button><button data-tab="tools">Tools & settings</button></nav>
+<section id="games"><h2>Games directory</h2><div class="controls"><input id="gameSearch" placeholder="Search games..." aria-label="Search games"><select id="gameCategory"><option value="">All categories</option><option>Arcade</option><option>Puzzle</option><option>Strategy</option><option>Sports</option><option>Adventure</option><option>Casual</option></select></div><div id="gameGrid" class="grid"></div><p id="gameCount"></p></section>
+<section id="apps" class="hidden"><h2>Apps directory</h2><input id="appSearch" placeholder="Search apps..." aria-label="Search apps"><div id="appGrid" class="grid"></div></section>
+<section id="tools" class="hidden"><h2>Tools & settings</h2><p>Customize the accent color:</p><input type="color" id="accent" value="#7c5cff"><h3>Citation formatter</h3><p>Enter details from a source you used. This formats them; it does not verify the source.</p><input id="author" placeholder="Author"><input id="title" placeholder="Page or article title"><input id="site" placeholder="Website name"><input id="date" placeholder="Publication date"><input id="url" placeholder="URL"><button id="cite">Create citation</button><p id="citation"></p><button id="copy">Copy citation</button><h3>Quick settings manual</h3><p>Use the tabs to switch directories. Search boxes filter the lists. Choose an accent color to change the highlight color. Links open third-party websites, which may be blocked or restricted by your network.</p></section>
+<footer><small>Directory links lead to third-party sites. Follow your school or network rules. This site does not include a proxy or network-filter bypass.</small></footer>
+</main><script src="catalog.js"></script><script>
+const $=s=>document.querySelector(s);
+function card(x,desc=''){return `<article class="item"><h3>${esc(x.name)}</h3><p>${esc(desc)}</p><a href="${x.url}" target="_blank" rel="noopener">Open website ↗</a></article>`}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderGames(){let q=$('#gameSearch').value.toLowerCase(),cat=$('#gameCategory').value;let a=GAMES.filter(x=>x.name.toLowerCase().includes(q)&&(!cat||x.category===cat));$('#gameGrid').innerHTML=a.map(x=>card(x,x.category+' • '+x.description)).join('');$('#gameCount').textContent=`Showing ${a.length} of ${GAMES.length} directory entries.`}
+function renderApps(){let q=$('#appSearch').value.toLowerCase(),a=APPS.filter(x=>x.name.toLowerCase().includes(q));$('#appGrid').innerHTML=a.map(x=>card(x,'Popular app or online service')).join('')}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');['games','apps','tools'].forEach(id=>$('#'+id).classList.toggle('hidden',id!==b.dataset.tab))});
+$('#gameSearch').oninput=renderGames;$('#gameCategory').onchange=renderGames;$('#appSearch').oninput=renderApps;
+$('#accent').oninput=e=>document.documentElement.style.setProperty('--accent',e.target.value);
+let citation='';$('#cite').onclick=()=>{citation=`${$('#author').value}. "${$('#title').value}." ${$('#site').value}, ${$('#date').value}, ${$('#url').value}.`;$('#citation').textContent=citation};
+$('#copy').onclick=()=>{if(citation)navigator.clipboard?.writeText(citation)};
+renderGames();renderApps();
+</script></body></html>
